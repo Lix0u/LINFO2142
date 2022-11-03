@@ -40,7 +40,7 @@ def get_ips(filename):
         return load(f)
 
 def save_ips(data, filename):
-    with open(filename) as f:
+    with open(filename, "w") as f:
         dump(data, f)
 
 if __name__ == "__main__":
@@ -48,8 +48,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Parse trace route json')
     parser.add_argument('address', help="the address to trace", default="", nargs='?')
+    parser.add_argument("--local", action="store_true")
 
     args = parser.parse_args()
+    if args.local:
+        traces_folder += "_local"
+    check_folder(traces_folder)
     if args.address:
         run_one(args.address)
     else:
