@@ -1,6 +1,40 @@
 from urllib.request import urlopen
 from json import load, dump
 
+IP_INFO = {}
+
+def cache(func):
+    def wrapper(*args, **kwargs):
+        cache_load()
+        r = func(*args, **kwargs)
+        cache_save()
+        return r
+    return wrapper
+
+def cacheIpInfo(func):
+    global IP_INFO
+    def wrapper(addr=""):
+        if addr in IP_INFO:
+            return IP_INFO[addr]
+        info = func(addr)
+        IP_INFO[addr] = info
+        return info
+    return wrapper
+
+def cache_load(filename="ipinfo.json"):
+    global IP_INFO
+    try:
+        if len(IP_INFO) == 0:
+            with open(filename) as f:
+                IP_INFO = load(f)
+    except:
+        pass
+
+def cache_save(filename="ipinfo.json"):
+    global IP_INFO
+    with open(filename, "w") as f:
+        dump(IP_INFO, f)
+
 def checkIPv4(addr):
     try:
         for i in addr.split("."):
@@ -9,19 +43,27 @@ def checkIPv4(addr):
         return False
     return True
 
+def get_org(addr):
+    return get_org_bogon(ipInfo(addr))
+
+def get_hostname(addr):
+    return ipInfo(addr).get("hostname", "")
+
+@cacheIpInfo
 def ipInfo(addr=''):
     if not checkIPv4(addr):
-        return
+        return {}
     if addr == '':
         url = 'https://ipinfo.io/json'
     else:
         url = 'https://ipinfo.io/' + addr + '/json'
     res = urlopen(url)
     if res == None:
-        return
+        return {}
     data = load(res)
+    if data == None:
+        return {}
     return data
-
 
 
 def get_all_ip(from_file, to_file, a=False):
@@ -50,6 +92,16 @@ def get_all_ip(from_file, to_file, a=False):
     
     with open(to_file, "w") as f:
         dump(maxi_dict, f)
+
+
+def get_org_bogon(info):
+    if info is None:
+        return "No info"
+    if "bogon" in info and info["bogon"]:
+        return "bogon"
+    if "org" in info:
+        return info["org"]
+    return "No info"
 
 if __name__ == "__main__":
     import argparse
