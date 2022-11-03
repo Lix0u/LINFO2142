@@ -37,16 +37,11 @@ def run_one(address):
 
 def get_ips(filename):
     with open(filename) as f:
-        data = load(f)
-        index = data["index"]
-        list_address = data["ip"]
-        trying = data.get("currently_running", False)
-
-    return list_address, index, trying
+        return load(f)
 
 def save_ips(data, filename):
     with open(filename) as f:
-        dump(data)
+        dump(data, f)
 
 if __name__ == "__main__":
     import argparse
@@ -58,12 +53,17 @@ if __name__ == "__main__":
     if args.address:
         run_one(args.address)
     else:
-        list_add, index, = get_ips(list_ip_folder)
-        while index < len(list_add):
-            run_one(list_add[index])
-            index += 1
-            save_ips({"index":index,"ip":list_add,"currently_running":True,"last_try":int(datetime.datetime.now().timestamp())})
-        index = 0
-        save_ips({"index":index,"ip":list_add,"currently_running":False,"last_finish":int(datetime.datetime.now().timestamp())})
+        data = get_ips(list_ip_folder)
+        while data["index"] < len(data["ip"]):
+            run_one(data["ip"][data["index"]])
+            data["index"] += 1
+            data["currently_running"] = True
+            data["last_try"] = int(datetime.datetime.now().timestamp())
+            save_ips(data, list_ip_folder)
+
+        data["index"] = 0
+        data["currently_running"] = False
+        data["last_finish"] = int(datetime.datetime.now().timestamp())
+        save_ips(data, list_ip_folder)
         
         
