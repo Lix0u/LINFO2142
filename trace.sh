@@ -1,9 +1,6 @@
 cd scripts
-
-until sudo python3 traceroute.py;
-do
-    echo "Script crash $?, Retrying in 10 seconds" >$2
-    sleep 10
+until sudo python3 traceroute.py; do
+    echo "Trace crash $?.  Respawning.. in 10 seconds" >&2
+    sleep 1
 done
-
 cd ..
