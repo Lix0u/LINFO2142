@@ -40,7 +40,9 @@ def get_ips(filename):
         data = load(f)
         index = data["index"]
         list_address = data["ip"]
-    return list_address, index
+        trying = data.get("currently_running", False)
+
+    return list_address, index, trying
 
 def save_ips(data, filename):
     with open(filename) as f:
@@ -56,12 +58,12 @@ if __name__ == "__main__":
     if args.address:
         run_one(args.address)
     else:
-        list_add, index = get_ips(list_ip_folder)
+        list_add, index, = get_ips(list_ip_folder)
         while index < len(list_add):
             run_one(list_add[index])
             index += 1
-            save_ips({"index":index,"ip":list_add})
+            save_ips({"index":index,"ip":list_add,"currently_running":True,"last_try":int(datetime.datetime.now().timestamp())})
         index = 0
-        save_ips({"index":index,"ip":list_add})
+        save_ips({"index":index,"ip":list_add,"currently_running":False,"last_finish":int(datetime.datetime.now().timestamp())})
         
         
