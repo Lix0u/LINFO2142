@@ -27,5 +27,7 @@ for address in list_address:
     current_file = join(address_folder, str(time_stamp) + ".json")
 
     print("Traceroute to", address)
-
-    DublinTraceroute(address).traceroute().save(current_file)
+    try:
+        DublinTraceroute(address).traceroute().save(current_file)
+    except:
+        print("OH NO")
