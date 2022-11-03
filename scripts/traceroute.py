@@ -1,7 +1,7 @@
 from os.path import join, exists
 from os import makedirs
 import datetime
-from json import load
+from json import load, dump
 
 from dublintraceroute import DublinTraceroute
 
@@ -35,6 +35,17 @@ def run_one(address):
     except:
         print("OH NO")
 
+def get_ips(filename):
+    with open(filename) as f:
+        data = load(f)
+        index = data["index"]
+        list_address = data["ip"]
+    return list_address, index
+
+def save_ips(data, filename):
+    with open(filename) as f:
+        dump(data)
+
 if __name__ == "__main__":
     import argparse
 
@@ -45,7 +56,12 @@ if __name__ == "__main__":
     if args.address:
         run_one(args.address)
     else:
-        with open(list_ip_folder) as f:
-            list_address = load(f)
+        list_add, index = get_ips(list_ip_folder)
+        while index < len(list_add):
+            run_one(list_add[index])
+            index += 1
+            save_ips({"index":index,"ip":list_add})
+        index = 0
+        save_ips({"index":index,"ip":list_add})
         
-        run_address(list_address)
+        
