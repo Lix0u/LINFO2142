@@ -309,8 +309,15 @@ class Graph:
         # Filter reverse way
         def get_end_leaf(node):
             l = edges_to_filtered.get(node, [])
-            if len(l) > 0:
-                return get_end_leaf(l[0])
+            visited = {node}
+            while len(l) > 0:
+                node = None
+                for j in l:
+                    if j not in visited:
+                        node = j
+                        visited.add(j)
+                        break
+                l = edges_to_filtered.get(node, [])
             return node
         root = get_end_leaf(list(edges_to_filtered.keys())[0])
         translate = {n:n for n in edges_to_reverse.keys()}
