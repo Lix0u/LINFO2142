@@ -193,6 +193,38 @@ class Graph:
         return graph
     
     @ipinfo.cache
+    def to_graphviz_color(self):
+        import pygraphviz
+        graph = pygraphviz.AGraph(strict=False, directed=True)
+        graph.node_attr['shape'] = 'ellipse'
+        graph.graph_attr['rankdir'] = 'BT'
+        for node in self.nodes:
+            hostname = self.names.get(node, '')
+            if not hostname:
+                hostname = ipinfo.get_hostname(node)
+            org = ipinfo.get_org(node)
+            color = "#FFFFFF"
+            colorScheme = {
+                "ovh":"#25FF25",
+                "google":"#AAAAAA",
+                "no info":"#FFDDDD",
+                "bogon":"#BBCCFF",
+                "globalcom":"#2BD1F2"
+            }
+            for orgName, colorCode in colorScheme.items():
+                if orgName.lower() in org.lower():
+                    color = colorCode
+                    break
+            graph.add_node(node, label=f"{node}\n{org}\n{hostname}", fillcolor=color, style="filled", color="#000000")
+        
+        for (n1, n2), value in self.edges.items():
+            graph.add_edge(n1, n2, label=str(value))
+
+        graph.layout('dot')
+        return graph
+
+
+    @ipinfo.cache
     def as_to_graphviz(self):
         import pygraphviz
         graph = pygraphviz.AGraph(strict=False, directed=True)

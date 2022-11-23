@@ -13,7 +13,7 @@ def check_folder(foldername):
 
 check_folder(images_folder)
 
-def graph_apa(asn, file_image):
+def graph_apa(asn, file_image, coloring):
     for address in listdir(traces_folder):
         all_time = listdir(join(traces_folder, address))
         graph = Graph()
@@ -32,7 +32,7 @@ def graph_apa(asn, file_image):
             graph.draw(image_file)
 
 
-def graph_aio(asn, file_image):
+def graph_aio(asn, file_image, coloring):
     graph = Graph()
     for address in listdir(traces_folder):
         all_time = listdir(join(traces_folder, address))
@@ -50,7 +50,10 @@ def graph_aio(asn, file_image):
     if asn:
         graph.as_to_graphviz().draw(image_file)
     else:
-        graph.draw(image_file)
+        if coloring:
+            graph.to_graphviz_color().draw(image_file)
+        else:
+            graph.draw(image_file)
 
 
 
@@ -58,10 +61,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description='Parse trace route json')
-    parser.add_argument("-a", "--aio", action="store_true")
-    parser.add_argument("--local", action="store_true")
-    parser.add_argument("-s", "--asn", action="store_true")
-    parser.add_argument("-f", default=None)
+    parser.add_argument("-a", "--aio", action="store_true", help="ALL IN ONE")
+    parser.add_argument("--local", action="store_true", help="use local file")
+    parser.add_argument("-s", "--asn", action="store_true", help="graph the AS")
+    parser.add_argument("-f", default=None, help="Name of the output file")
+    parser.add_argument("-c", action="store_true", help="Color OVH")
 
     args = parser.parse_args()
     if args.local:
@@ -69,6 +73,6 @@ if __name__ == "__main__":
         traces_folder += "_local"
     check_folder(images_folder)
     if args.aio:
-        graph_aio(args.asn, args.f)
+        graph_aio(args.asn, args.f, args.c)
     else:
-        graph_apa(args.asn, args.f)
+        graph_apa(args.asn, args.f, args.c)

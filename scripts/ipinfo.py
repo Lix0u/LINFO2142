@@ -46,6 +46,12 @@ def checkIPv4(addr):
 def get_org(addr):
     return get_org_bogon(ipInfo(addr))
 
+def get_loc(addr):
+    return _get_loc(ipInfo(addr))
+
+def get_city(addr):
+    return _get_city(ipInfo(addr))
+
 def get_hostname(addr):
     return ipInfo(addr).get("hostname", "")
 
@@ -102,6 +108,16 @@ def get_org_bogon(info):
     if "org" in info:
         return info["org"]
     return "No info"
+
+def _get_loc(info):
+    if info is None:
+        return (0,0)
+    return info.get("loc", (0,0))
+
+def _get_city(info):
+    if info is None:
+        return "No where"
+    return info.get("city", "No where")
 
 if __name__ == "__main__":
     import argparse
