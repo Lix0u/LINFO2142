@@ -113,7 +113,7 @@ def info_to_graphviz(traceroute, no_rtt=False):
 
 class Graph:
     def __init__(self):
-        self.nodes = {}
+        self.nodes : dict[str, str] = {}
         self.edges = {}
         self.names = {}
     
@@ -219,6 +219,63 @@ class Graph:
         
         for (n1, n2), value in self.edges.items():
             graph.add_edge(n1, n2, label=str(value))
+
+        graph.layout('dot')
+        return graph
+
+    @ipinfo.cache
+    def to_graphviz_filtered(self):
+        keepingOrg = {"ovh", "bogon","no info"}
+        def keepIt(node):
+            org = ipinfo.get_org(node).lower()
+            for kpO in keepingOrg:
+                if kpO.lower() in org:
+                    if org != "no info":
+                        return True
+                    # return not ipinfo.checkIPv4(node)
+                    # return True
+                    return node.lower().startswith("NULL".lower()) and int(node.lower()[4:]) < 15
+            return False
+        import pygraphviz
+        graph = pygraphviz.AGraph(strict=False, directed=True)
+        graph.node_attr['shape'] = 'ellipse'
+        graph.graph_attr['rankdir'] = 'BT'
+        for node in self.nodes:
+            hostname = self.names.get(node, '')
+            if not hostname:
+                hostname = ipinfo.get_hostname(node)
+            org = ipinfo.get_org(node)
+            color = "#FFFFFF"
+            colorScheme = {
+                "ovh":"#25FF25",
+                "google":"#AAAAAA",
+                "no info":"#FFDDDD",
+                "bogon":"#BBCCFF",
+                "globalcom":"#2BD1F2"
+            }
+            
+            for orgName, colorCode in colorScheme.items():
+                if orgName.lower() in org.lower():
+                    color = colorCode
+                    break
+            if keepIt(node):
+                # if org != "no info" or node.lower().startswith("NULL".lower()):
+                graph.add_node(node, label=f"{node}\n{org}\n{hostname}", fillcolor=color, style="filled", color="#000000")
+
+        for (n1, n2), value in self.edges.items():
+            # org1 = ipinfo.get_org(n1)
+            # org2 = ipinfo.get_org(n2)
+            if keepIt(n1):
+                if keepIt(n2):
+                    graph.add_edge(n1, n2, label=str(value))
+                else:
+                    if not n1.lower().startswith("null"):
+                        graph.add_edge(n1, "OUT", label=str(value))
+        
+        try:
+            graph.get_node("OUT").attr.update({"style":"filled", "fillcolor":"#EE2222", "color":"#000000"})
+        except:
+            print("NO OUT")
 
         graph.layout('dot')
         return graph

@@ -32,7 +32,7 @@ def graph_apa(asn, file_image, coloring):
             graph.draw(image_file)
 
 
-def graph_aio(asn, file_image, coloring):
+def graph_aio(asn, file_image, coloring, filter):
     graph = Graph()
     for address in listdir(traces_folder):
         all_time = listdir(join(traces_folder, address))
@@ -50,7 +50,9 @@ def graph_aio(asn, file_image, coloring):
     if asn:
         graph.as_to_graphviz().draw(image_file)
     else:
-        if coloring:
+        if filter:
+            graph.to_graphviz_filtered().draw(image_file)
+        elif coloring:
             graph.to_graphviz_color().draw(image_file)
         else:
             graph.draw(image_file)
@@ -65,7 +67,8 @@ if __name__ == "__main__":
     parser.add_argument("--local", action="store_true", help="use local file")
     parser.add_argument("-s", "--asn", action="store_true", help="graph the AS")
     parser.add_argument("-f", default=None, help="Name of the output file")
-    parser.add_argument("-c", action="store_true", help="Color OVH")
+    parser.add_argument("-c", action="store_true", help="Color")
+    parser.add_argument("-o", action="store_true", help="Keep Only OVH, NULL and bogon")
 
     args = parser.parse_args()
     if args.local:
@@ -73,6 +76,6 @@ if __name__ == "__main__":
         traces_folder += "_local"
     check_folder(images_folder)
     if args.aio:
-        graph_aio(args.asn, args.f, args.c)
+        graph_aio(args.asn, args.f, args.c, args.o)
     else:
         graph_apa(args.asn, args.f, args.c)
