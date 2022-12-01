@@ -22,14 +22,19 @@ def graph_apa(asn, file_image, coloring):
             with open(file) as f:
                 graph.from_json(load(f))
         max_tsp = max(map(lambda x: int(splitext(x)[0]), all_time))
+        _image_folder = join(images_folder, "by_dest")
+        check_folder(_image_folder)
         if not file_image:
-            image_file = join(images_folder, "{}_{}.png".format(address, max_tsp))
+            image_file = join(_image_folder, "{}_{}.png".format(address, max_tsp))
         else:
-            image_file = join(images_folder, file_image)
+            image_file = join(_image_folder, file_image)
         if asn:
             graph.as_to_graphviz().draw(image_file)
         else:
-            graph.draw(image_file)
+            if coloring:
+                graph.to_graphviz_color().draw(image_file)
+            else:
+                graph.draw(image_file)
 
 
 def graph_aio(asn, file_image, coloring, filter):
