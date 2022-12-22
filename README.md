@@ -1,6 +1,12 @@
 # Equal-cost multi-path using Dublin traceroute
 
+A graph with every hops found can be found [there](/images/every_hops.png)
+
+For a graph with only the inside node of OVH can be found [there](/images/OVH_two_sources.png)
+
 ## Utilisation
+
+You need to install the requirements that are in *scripts/requirement.txt*
 
 To trace all ip launch the `trace.sh` script.
 
@@ -48,3 +54,8 @@ The -c will put color one the graph. Really usefull (Recommended)
 The -o (only work with -a) output only the hops from OVH.
 
 Other parameter can be ignored.
+
+## Description of the files
+
+Inside the folder *scripts*:
+
