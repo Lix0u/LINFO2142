@@ -8,6 +8,8 @@ except ModuleNotFoundError:
 @ipinfo.cache
 def info_to_graphviz(traceroute, no_rtt=False):
     '''
+    Method from DublinTraceroute sources
+    
     Convert a traceroute to a graphviz object.
 
     This method creates a GraphViz object from the output of
@@ -141,7 +143,13 @@ class Graph:
             self.names = data["names"]
 
 
-    def from_json(self, traceroute):
+    def from_json(self, traceroute, only_from_src=None):
+        if only_from_src:
+            for _, hops in traceroute['flows'].items():
+                src = hops[0]['sent']['ip']['src']
+                break
+            if only_from_src != src:
+                return
         for _, hops in traceroute['flows'].items():
             
             src = hops[0]['sent']['ip']['src']

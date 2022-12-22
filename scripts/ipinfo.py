@@ -1,7 +1,11 @@
 from urllib.request import urlopen
+from urllib.error import HTTPError
 from json import load, dump
+from time import sleep
 
 IP_INFO = {}
+
+IP_FAILED = []
 
 def cache(func):
     def wrapper(*args, **kwargs):
@@ -17,7 +21,8 @@ def cacheIpInfo(func):
         if addr in IP_INFO:
             return IP_INFO[addr]
         info = func(addr)
-        IP_INFO[addr] = info
+        if info:
+            IP_INFO[addr] = info
         return info
     return wrapper
 
@@ -63,13 +68,18 @@ def ipInfo(addr=''):
         url = 'https://ipinfo.io/json'
     else:
         url = 'https://ipinfo.io/' + addr + '/json'
-    res = urlopen(url)
-    if res == None:
+    try:
+        res = urlopen(url)
+        if res == None:
+            return {}
+        data = load(res)
+        if data == None:
+            return {}
+    except HTTPError as e:
+        # print(e.headers,e.reason,sep="\n")
+        IP_FAILED.append(addr)
         return {}
-    data = load(res)
-    if data == None:
-        return {}
-    return data
+    return data 
 
 
 def get_all_ip(from_file, to_file, a=False):
